@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { createItems, ItemType } from './createItems';
+import Board from './components/Board';
+import Attempts from './components/Attempts';
+import ResetButton from './components/ResetButton';
+import "./App.css"
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+    const [items, setItems] = useState<ItemType[]>(createItems());
+    const [attempts, setAttempts] = useState<number>(0);
+    const [gameOver, setGameOver] = useState<boolean>(false);
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    const handleClick = (index: number) => {
+        if (gameOver || items[index].clicked) return;
 
-export default App
+        const newItems = items.map((item, i) =>
+            i === index ? { ...item, clicked: true } : item
+        );
+
+        setItems(newItems);
+        setAttempts(attempts + 1);
+
+        if (newItems[index].hasItem) {
+            setGameOver(true);
+        }
+    };
+
+    const handleReset = () => {
+        setItems(createItems());
+        setAttempts(0);
+        setGameOver(false);
+    };
+
+    return (
+        <div className="game">
+            <h1>Найди спрятанный предмет</h1>
+            <Attempts attempts={attempts} />
+            <Board items={items} handleClick={handleClick} />
+            {gameOver && <p>Вы выйграли за {attempts} попыток!</p>}
+            <ResetButton handleReset={handleReset} />
+        </div>
+    );
+};
+
+export default App;
